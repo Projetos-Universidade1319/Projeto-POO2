@@ -7,23 +7,23 @@ public class UsuarioModel {
     private String nome;
     private String email;
     private String senha;
-    private String nivel_conta;
+    private String nivelconta;
     private float pontuacao;
 
-    public int getId_usuario() {
+    public int getIdUsuario() {
         return id_usuario;
     }
 
-    public void setId_usuario(int id_usuario) {
+    public void setIdUsuario(int id_usuario) {
         this.id_usuario = id_usuario;
     }
     
-    public String getNivel_conta() {
-        return nivel_conta;
+    public String getNivelConta() {
+        return nivelconta;
     }
 
-    public void setNivel_conta(String nivel_conta) {
-        this.nivel_conta = nivel_conta;
+    public void setNivelConta(String nivel_conta) {
+        this.nivelconta = nivel_conta;
     }
 
     public float getPontuacao() {

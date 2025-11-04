@@ -3,7 +3,6 @@ package service;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.ArrayList;
 import model.ReceitaModel;
 import model.UsuarioModel;
 import dao.ReceitaDAO;
@@ -37,10 +36,9 @@ public class ReceitaService {
         }
     }
 
-    public List<ReceitaModel> buscarEOrdenar(String termoBusca, String categoria) {
+    public List<ReceitaModel> buscarEOrdenar(String termoBusca, String categoria) throws SQLException {
         
         List<ReceitaModel> resultados = receitaDAO.buscarPorTermoECategoria(termoBusca, categoria);
-        
         
         Collections.sort(resultados, new Comparator<ReceitaModel>() {
             @Override
@@ -50,7 +48,7 @@ public class ReceitaService {
                 int pontuacao2 = r2.getCurtidas();
                 
                 if (pontuacao1 != pontuacao2) {
-                    return Integer.compare(pontuacao2, pontuacao1); 
+                    return Integer.compare(pontuacao2, pontuacao1);
                 }
                 
                 try {
@@ -61,7 +59,8 @@ public class ReceitaService {
                         return Integer.compare(nivel2, nivel1);
                     }
                 } catch (SQLException e) {
-                    System.err.println("Erro ao buscar nível do autor durante o ranqueamento: " + e.getMessage());
+                    System.err.println("Falha temporária ao buscar nível do autor. Tratando como empate: " + e.getMessage());
+                    return 0; 
                 }
 
                 if (r1.getDataCriacao() != null && r2.getDataCriacao() != null) {
