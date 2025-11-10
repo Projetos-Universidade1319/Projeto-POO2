@@ -1,20 +1,20 @@
 package dao;
 
 import model.UsuarioModel;
+import model.NivelConta;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-
 public class UsuarioDAO {
     
     /**
-     * @param idUsuario 
-     * @return 
+     * * @param idUsuario 
+     * @return
      * @throws SQLException
      */
-    public int getNivelAutor(int idUsuario) throws SQLException {
+    public String getNivelAutor(int idUsuario) throws SQLException {
         String sql = "SELECT nivel_conta FROM usuario WHERE id_usuario = ?";
         
         try (Connection conn = ConnectionFactory.getConnection();
@@ -24,9 +24,9 @@ public class UsuarioDAO {
             
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt("nivel_conta");
+                    return rs.getString("nivel_conta"); 
                 } else {
-                    return 0;
+                    return null;
                 }
             }
         } catch (SQLException e) {
@@ -36,8 +36,8 @@ public class UsuarioDAO {
     }
     
     /**
-     * @param usuario
-     * @return
+     * * @param usuario
+     * @return 
      * @throws SQLException
      */
     public boolean cadastrar(UsuarioModel usuario) throws SQLException {
@@ -48,8 +48,8 @@ public class UsuarioDAO {
 
             stmt.setString(1, usuario.getNome());
             stmt.setString(2, usuario.getEmail());
-            stmt.setString(3, usuario.getSenha()); 
-            stmt.setString(4, usuario.getNivelConta()); 
+            stmt.setString(3, usuario.getSenha());
+            stmt.setString(4, usuario.getNivelConta().name()); 
             stmt.setFloat(5, usuario.getPontuacao());
             
             int linhasAfetadas = stmt.executeUpdate();
@@ -64,8 +64,8 @@ public class UsuarioDAO {
     }
     
     /**
-     * @param email
-     * @return 
+     * * @param email
+     * @return
      * @throws SQLException
      */
     public UsuarioModel buscarPorEmail(String email) throws SQLException {
@@ -84,8 +84,10 @@ public class UsuarioDAO {
                     usuario.setIdUsuario(rs.getInt("id_usuario")); 
                     usuario.setNome(rs.getString("nome"));
                     usuario.setEmail(rs.getString("email"));
-                    usuario.setSenha(rs.getString("senha"));
-                    usuario.setNivelConta(rs.getString("nivel_conta"));
+                    usuario.setSenha(rs.getString("senha")); 
+                    String nivelContaStr = rs.getString("nivel_conta");
+                    usuario.setNivelConta(NivelConta.valueOf(nivelContaStr));
+                    
                     usuario.setPontuacao(rs.getFloat("pontuacao"));
                 }
             }
@@ -97,7 +99,7 @@ public class UsuarioDAO {
     }
 
     /**
-     * @param idUsuario
+     * * @param idUsuario
      * @param pontos
      * @return
      * @throws SQLException
@@ -110,12 +112,32 @@ public class UsuarioDAO {
             stmt.setInt(1, pontos);
             stmt.setInt(2, idUsuario);
             
+            return stmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao atualizar pontuação do usuário " + idUsuario + ": " + e.getMessage());
+            throw e; 
+        }
+    }
+    /**
+     * @param idUsuario 
+     * @return 
+     * @throws SQLException
+     */
+    public boolean deletarUsuario(int idUsuario) throws SQLException {
+
+        String sql = "DELETE FROM usuario WHERE id_usuario = ?";
+        
+        try (Connection conn = ConnectionFactory.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, idUsuario);
             int linhasAfetadas = stmt.executeUpdate();
             
             return linhasAfetadas > 0;
 
         } catch (SQLException e) {
-            System.err.println("Erro ao atualizar pontuação do usuário " + idUsuario + ": " + e.getMessage());
+            System.err.println("Erro ao deletar usuário (ID: " + idUsuario + "): " + e.getMessage());
             throw e; 
         }
     }

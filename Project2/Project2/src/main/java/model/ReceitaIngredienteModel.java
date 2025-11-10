@@ -3,7 +3,7 @@ package model;
 public class ReceitaIngredienteModel {
      private int id_receita;
      private int id_ingrediente;
-     private int quantidade;
+     private double quantidade;
 
     public int getId_receita() {
         return id_receita;
@@ -21,11 +21,11 @@ public class ReceitaIngredienteModel {
         this.id_ingrediente = id_ingrediente;
     }
 
-    public int getQuantidade() {
+    public double getQuantidade() {
         return quantidade;
     }
 
-    public void setQuantidade(int quantidade) {
+    public void setQuantidade(double quantidade) {
         this.quantidade = quantidade;
     }
      

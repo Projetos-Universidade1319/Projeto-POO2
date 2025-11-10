@@ -1,23 +1,17 @@
 package model;
 
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+import java.time.LocalDateTime; 
 
-
-/**
- *
- * @author rsbuf
- */
 public class AvaliacaoModel {
+
     private int id_avaliacao;
     private int id_receita;
-    private String nome;
+    private int id_usuario; 
     private String comentario;
     private int curtidas;
-    private int data_avaliacao;
+    private LocalDateTime data_avaliacao; 
 
+    
     public int getId_avaliacao() {
         return id_avaliacao;
     }
@@ -34,12 +28,12 @@ public class AvaliacaoModel {
         this.id_receita = id_receita;
     }
 
-    public String getNome() {
-        return nome;
+    public int getId_usuario() {
+        return id_usuario;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setId_usuario(int id_usuario) {
+        this.id_usuario = id_usuario;
     }
 
     public String getComentario() {
@@ -58,12 +52,13 @@ public class AvaliacaoModel {
         this.curtidas = curtidas;
     }
 
-    public int getData_avaliacao() {
+    public LocalDateTime getData_avaliacao() {
         return data_avaliacao;
     }
 
-    public void setData_avaliacao(int data_avaliacao) {
+    public void setData_avaliacao(LocalDateTime data_avaliacao) {
         this.data_avaliacao = data_avaliacao;
     }
+
     
 }

@@ -48,7 +48,7 @@ public class ReceitaDAO {
                             for (ReceitaIngredienteModel item : receita.getListaIngredientes()) { 
                                 stmtIngrediente.setInt(1, idReceitaGerado);
                                 stmtIngrediente.setInt(2, item.getId_ingrediente());
-                                stmtIngrediente.setInt(3, item.getQuantidade());
+                                stmtIngrediente.setDouble(3, item.getQuantidade()); 
                                 
                                 stmtIngrediente.addBatch();
                             }

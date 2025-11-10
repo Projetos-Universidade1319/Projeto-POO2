@@ -1,4 +1,4 @@
-
+ /* 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -81,7 +81,7 @@ public class Conexao {
         }catch(Exception e){
                 System.out.println("Erro ao deletar usuario: " + e.getMessage());
             }*/
-        String sql5 = "CREATE TABLE IF NOT EXISTS avaliacao (" +
+        /*String sql5 = "CREATE TABLE IF NOT EXISTS avaliacao (" +
                       "id_avaliacao INT PRIMARY KEY NOT NULL, " +
                       "id_receita INT, " +
                       "nome VARCHAR(100), " +
@@ -169,4 +169,4 @@ public class Conexao {
             }
         }
     }
-}
+}*/

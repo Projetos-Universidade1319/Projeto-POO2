@@ -1,16 +1,21 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 
-/**
- *
- * @author rsbuf
- */
 public class VerificaLogin implements VerificaPadrao {
 
-    public boolean casoVerifica(String caso);
-       
-    
+    /**
+     * @param caso
+     * @return 
+     */
+    @Override 
+    public boolean casoVerifica(String caso) {
+        
+        if (caso == null || caso.trim().isEmpty()) {
+            return false;
+        }
+
+        if (!caso.contains("@") || !caso.contains(".")) {
+            return false;
+        }
+        return true; 
+    }
 }

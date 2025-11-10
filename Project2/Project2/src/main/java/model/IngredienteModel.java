@@ -7,7 +7,7 @@ package model;
 public class IngredienteModel {
     private int id_ingrediente;
     private String nome;
-    private String unidade_medida;
+    private UnidadeMedida unidade_medida;
 
     public int getId_ingrediente() {
         return id_ingrediente;
@@ -25,12 +25,12 @@ public class IngredienteModel {
         this.nome = nome;
     }
 
-    public String getUnidade_medida() {
+    public UnidadeMedida getUnidade_medida() { 
         return unidade_medida;
     }
 
-    public void setUnidade_medida(String unidade_medida) {
-        this.unidade_medida = unidade_medida;
+    public void setUnidade_medida(UnidadeMedida unidade_medida) {
+    this.unidade_medida = unidade_medida;
     }
     
 }
