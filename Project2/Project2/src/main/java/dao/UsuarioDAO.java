@@ -40,11 +40,10 @@ public class UsuarioDAO {
      * @return 
      * @throws SQLException
      */
-    public boolean cadastrar(UsuarioModel usuario) throws SQLException {
-        String sql = "INSERT INTO usuario (nome, email, senha, nivel_conta, pontuacao) VALUES (?, ?, ?, ?, ?)";
-        
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+    public boolean cadastrar(UsuarioModel usuario, Connection conn) throws SQLException {
+    String sql = "INSERT INTO usuario (nome, email, senha, nivel_conta, pontuacao) VALUES (?, ?, ?, ?, ?)";
+    
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, usuario.getNome());
             stmt.setString(2, usuario.getEmail());
@@ -52,10 +51,11 @@ public class UsuarioDAO {
             stmt.setString(4, usuario.getNivelConta().name()); 
             stmt.setFloat(5, usuario.getPontuacao());
             
-            int linhasAfetadas = stmt.executeUpdate();
-            
+            int linhasAfetadas = stmt.executeUpdate(); 
+
             System.out.println("Usuário cadastrado com sucesso!");
-            return linhasAfetadas > 0;
+
+            return linhasAfetadas > 0; 
 
         } catch (SQLException e) {
             System.err.println("Erro ao cadastrar usuário: " + e.getMessage());
@@ -104,14 +104,12 @@ public class UsuarioDAO {
      * @return
      * @throws SQLException
      */
-    public boolean atualizarPontuacao(int idUsuario, int pontos) throws SQLException {
+    public boolean atualizarPontuacao(int idUsuario, int pontos, Connection conn) throws SQLException { // ⚠️ RECEBE CONNECTION
         String sql = "UPDATE usuario SET pontuacao = pontuacao + ? WHERE id_usuario = ?";
         
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, pontos);
             stmt.setInt(2, idUsuario);
-            
             return stmt.executeUpdate() > 0;
 
         } catch (SQLException e) {
@@ -119,17 +117,18 @@ public class UsuarioDAO {
             throw e; 
         }
     }
+    
     /**
      * @param idUsuario 
+     * @param conn 
      * @return 
      * @throws SQLException
      */
-    public boolean deletarUsuario(int idUsuario) throws SQLException {
-
+    public boolean deletarUsuario(int idUsuario, Connection conn) throws SQLException {
+        
         String sql = "DELETE FROM usuario WHERE id_usuario = ?";
         
-        try (Connection conn = ConnectionFactory.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, idUsuario);
             int linhasAfetadas = stmt.executeUpdate();

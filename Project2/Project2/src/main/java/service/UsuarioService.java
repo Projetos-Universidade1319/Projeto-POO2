@@ -4,7 +4,12 @@ import dao.UsuarioDAO;
 import model.UsuarioModel; 
 import model.TipoAcaoPontuacao;
 import java.sql.SQLException;
+import java.sql.Connection; 
 import org.mindrot.jbcrypt.BCrypt; 
+import model.NivelConta;
+import java.util.Arrays;
+import java.util.Comparator;
+import dao.ConnectionFactory; 
 
 public class UsuarioService {
 
@@ -16,7 +21,7 @@ public class UsuarioService {
 
     /**
      * @param novoUsuario 
-     * @return
+     * @return 
      * @throws Exception 
      */
     public boolean cadastrar(UsuarioModel novoUsuario) throws Exception {
@@ -28,8 +33,9 @@ public class UsuarioService {
         String senhaTextoPuro = novoUsuario.getSenha();
         String senhaHash = BCrypt.hashpw(senhaTextoPuro, BCrypt.gensalt(10)); 
         novoUsuario.setSenha(senhaHash);
-        try {
-            return usuarioDAO.cadastrar(novoUsuario);
+        
+        try (Connection conn = ConnectionFactory.getConnection()) {
+            return usuarioDAO.cadastrar(novoUsuario, conn); 
         } catch (SQLException e) {
             System.err.println("Erro SQL ao cadastrar usuário: " + e.getMessage());
             throw new Exception("Falha ao salvar usuário no banco de dados.", e);
@@ -39,7 +45,7 @@ public class UsuarioService {
     /**
      * @param email
      * @param senhaTextoPuro 
-     * @return
+     * @return 
      * @throws SQLException
      */
     public UsuarioModel login(String email, String senhaTextoPuro) throws SQLException {
@@ -59,7 +65,13 @@ public class UsuarioService {
         }
     }
 
-    public boolean darPontosPorAcao(int idUsuario, TipoAcaoPontuacao tipoAcao) {
+    /**
+     * @param idUsuario 
+     * @param tipoAcao 
+     * @param conn 
+     * @return 
+     */
+    public boolean darPontosPorAcao(int idUsuario, TipoAcaoPontuacao tipoAcao, Connection conn) throws SQLException {
         
         int pontos = 0;
 
@@ -78,31 +90,46 @@ public class UsuarioService {
                 return false;
         }
 
-        try {
-            return usuarioDAO.atualizarPontuacao(idUsuario, pontos);
-            
-        } catch (SQLException e) {
-            System.err.println("Erro ao dar pontos ao usuário " + idUsuario + ": " + e.getMessage());
-            return false;
-        }
-    }
-
-    public String calcularNivel(float pontuacaoAtual) {
-        if (pontuacaoAtual >= 1000) return "Chef Master";
-        if (pontuacaoAtual >= 500) return "Chef Sênior";
-        if (pontuacaoAtual >= 100) return "Chef Júnior";
-        return "Novato";
+        return usuarioDAO.atualizarPontuacao(idUsuario, pontos, conn); 
     }
 
     /**
-     * @param idUsuario
-     * @return t
-     * @throws Exception 
+     * @param pontuacao 
+     * @return 
+     */
+    public NivelConta calcularNivelUsuario(double pontuacao) {
+        
+        return Arrays.stream(NivelConta.values())
+                .filter(nivel -> pontuacao >= nivel.getPontuacaoMinima())
+                .max(Comparator.comparingInt(NivelConta::getPontuacaoMinima))
+                .orElse(NivelConta.PADRAO);
+    }
+
+    /**
+     * @param usuario 
+     * @throws Exception
+     */
+    public void verificarEAtualizarNivel(UsuarioModel usuario) throws Exception {
+        NivelConta nivelAtual = calcularNivelUsuario(usuario.getPontuacao());
+
+        if (!nivelAtual.name().equals(usuario.getNivelConta().name())) {
+            
+            System.out.println("🎉 Usuário " + usuario.getNome() + " subiu para o nível: " + nivelAtual.getNomeNivel());
+
+            usuario.setNivelConta(nivelAtual);
+        }
+    }
+
+    /**
+     * @param idUsuario 
+     * @return 
+     * @throws Exception
      */
     public boolean removerUsuario(int idUsuario) throws Exception {
         
-        try {
-            boolean sucesso = usuarioDAO.deletarUsuario(idUsuario);
+        try (Connection conn = ConnectionFactory.getConnection()) {
+            
+            boolean sucesso = usuarioDAO.deletarUsuario(idUsuario, conn); 
             
             if (sucesso) {
                 System.out.println("Usuário ID " + idUsuario + " removido com sucesso.");

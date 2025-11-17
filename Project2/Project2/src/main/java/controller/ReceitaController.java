@@ -4,18 +4,14 @@ import java.util.List;
 import java.util.ArrayList;
 import model.ReceitaModel;
 import model.UsuarioModel;
-import model.TipoAcaoPontuacao;
 import service.ReceitaService;
-import service.UsuarioService;
 import java.sql.SQLException;
 
 public class ReceitaController {
     private final ReceitaService receitaService;
-    private final UsuarioService usuarioService;
     
     public ReceitaController(){
        this.receitaService = new ReceitaService();
-       this.usuarioService = new UsuarioService();
     }
 
     public boolean publicarNovaReceita(ReceitaModel novaReceita, UsuarioModel autor){
@@ -28,8 +24,7 @@ public class ReceitaController {
             boolean sucesso = receitaService.processarPublicacao(novaReceita, autor);
 
             if (sucesso) {
-                usuarioService.darPontosPorAcao(autor.getIdUsuario(), TipoAcaoPontuacao.PUBLICACAO_RECEITA);
-                System.out.println("Publicação bem-sucedida e pontos atribuídos.");
+                System.out.println("Publicação bem-sucedida e pontos atribuídos."); 
             }
 
             return sucesso;
@@ -44,10 +39,15 @@ public class ReceitaController {
         }
     }
 
-
+    /**
+     * @param termoBusca
+     * @param categoria 
+     * @param usuarioLogado
+     * @return
+     */
     public List<ReceitaModel> buscarEClassificar(String termoBusca, String categoria, UsuarioModel usuarioLogado){
         try {
-            List<ReceitaModel> resultados = receitaService.buscarEOrdenar(termoBusca, categoria);
+            List<ReceitaModel> resultados = receitaService.buscarEOrdenar(termoBusca, categoria, usuarioLogado);
             System.out.println("Busca por '" + termoBusca + "' realizada e ordenada.");
             return resultados;
             
@@ -57,17 +57,54 @@ public class ReceitaController {
         }
     }
 
+    /**
+     * @param idReceita 
+     * @param idUsuario
+     * @return 
+     */
     public boolean curtirReceita(int idReceita, int idUsuario) {
         
         try {
-            receitaService.registrarCurtida(idReceita, idUsuario); 
-            usuarioService.darPontosPorAcao(idUsuario, TipoAcaoPontuacao.CURTIDA);
+            receitaService.curtirReceita(idReceita, idUsuario); 
             
+            System.out.println("Curtida registrada com sucesso.");
             return true;
             
         } catch (Exception e) {
             System.err.println("Erro ao curtir receita: " + e.getMessage());
             return false;
+        }
+    }
+    
+    /**
+     * @param receita 
+     * @param idUsuarioLogado 
+     * @return 
+     */
+    public boolean editarReceita(ReceitaModel receita, int idUsuarioLogado) {
+        try {
+            return receitaService.editarReceita(receita, idUsuarioLogado);
+        } catch (Exception e) {
+            System.err.println("Erro ao editar receita: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * @param idReceita
+     * @param idUsuarioLogado 
+     * @return
+     */
+    public String excluirReceita(int idReceita, int idUsuarioLogado) {
+        try {
+            boolean sucesso = receitaService.excluirReceita(idReceita, idUsuarioLogado);
+            if (sucesso) {
+                return "SUCESSO: Receita ID " + idReceita + " excluída.";
+            } else {
+                return "FALHA: Receita não encontrada ou sem permissão.";
+            }
+        } catch (Exception e) {
+            return "ERRO INTERNO: " + e.getMessage();
         }
     }
 }

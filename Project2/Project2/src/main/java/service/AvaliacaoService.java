@@ -2,8 +2,9 @@ package service;
 
 import model.AvaliacaoModel;
 import dao.AvaliacaoDAO;
-import dao.UsuarioDAO; 
+import dao.ConnectionFactory; 
 import model.TipoAcaoPontuacao;
+import java.sql.Connection;    
 import java.sql.SQLException;
 import java.util.List;
 
@@ -18,8 +19,8 @@ public class AvaliacaoService {
     }
 
     /**
-     * * @param avaliacao
-     * @return 
+     * @param avaliacao
+     * @return
      * @throws Exception 
      */
     public boolean processarAvaliacao(AvaliacaoModel avaliacao) throws Exception {
@@ -28,31 +29,75 @@ public class AvaliacaoService {
             throw new IllegalArgumentException("O comentário deve ter pelo menos 5 caracteres.");
         }
         
-        boolean sucesso = false;
+        Connection conn = null; 
         try {
-            sucesso = avaliacaoDAO.salvarNovaAvaliacao(avaliacao);
+            conn = ConnectionFactory.getConnection();
+            conn.setAutoCommit(false); 
+
+            boolean sucesso = avaliacaoDAO.salvarNovaAvaliacao(avaliacao, conn); 
             
-            if (sucesso) {
-                boolean pontosSucesso = usuarioService.darPontosPorAcao(
-                    avaliacao.getId_usuario(), 
-                    TipoAcaoPontuacao.COMENTARIO 
-                );
-                
-                if (!pontosSucesso) {
-                    System.err.println("Aviso: Falha ao atribuir pontos ao usuário " + avaliacao.getId_usuario());
-                }
+            if (!sucesso) {
+                 throw new SQLException("Falha ao inserir avaliação. Nenhuma linha afetada.");
             }
             
-            return sucesso;
+            boolean pontosSucesso = usuarioService.darPontosPorAcao(
+                avaliacao.getId_usuario(), 
+                TipoAcaoPontuacao.COMENTARIO,
+                conn 
+            ); 
+            
+            if (!pontosSucesso) {
+                 throw new SQLException("Falha ao atribuir pontos. Transação será desfeita.");
+            }
+            
+            conn.commit();
+            return true;
             
         } catch (SQLException e) {
-            System.err.println("Erro no Service ao salvar avaliação: " + e.getMessage());
-            throw new Exception("Falha ao salvar a avaliação no sistema.", e); 
+            System.err.println("Erro no Service ao processar avaliação. Desfazendo operações...");
+            if (conn != null) {
+                conn.rollback();
+            }
+            throw new Exception("Falha transacional ao salvar a avaliação e atribuir pontos.", e); 
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    System.err.println("Erro ao fechar conexão após transação: " + e.getMessage());
+                }
+            }
         }
     }
-    
 
     public List<AvaliacaoModel> buscarAvaliacoesPorReceita(int idReceita) throws SQLException {
         return avaliacaoDAO.buscarPorReceita(idReceita);
+    }
+
+    /**
+     * @param avaliacao
+     * @return
+     * @throws Exception
+     */
+    public boolean editarAvaliacao(AvaliacaoModel avaliacao) throws Exception {
+        try {
+            return avaliacaoDAO.atualizarAvaliacao(avaliacao); 
+        } catch (SQLException e) {
+            throw new Exception("Falha ao atualizar a avaliação no banco de dados.", e);
+        }
+    }
+
+    /**
+     * @param idAvaliacao
+     * @return
+     * @throws Exception
+     */
+    public boolean excluirAvaliacao(int idAvaliacao) throws Exception {
+        try {
+            return avaliacaoDAO.deletarAvaliacao(idAvaliacao); 
+        } catch (SQLException e) {
+            throw new Exception("Falha ao excluir a avaliação. Tente novamente.", e);
+        }
     }
 }

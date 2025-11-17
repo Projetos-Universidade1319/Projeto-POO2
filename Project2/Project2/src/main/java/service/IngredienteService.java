@@ -1,50 +1,54 @@
 package service;
 
-import dao.IngredienteDAO;
 import model.IngredienteModel;
+import dao.IngredienteDAO;
+import dao.ConnectionFactory;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
 public class IngredienteService {
     
     private final IngredienteDAO ingredienteDAO;
-    
+
     public IngredienteService() {
         this.ingredienteDAO = new IngredienteDAO(); 
     }
 
-    /**
-     * * @param novoIngrediente
-     * @return 
-     * @throws Exception 
-     */
-    public boolean salvarIngrediente(IngredienteModel novoIngrediente) throws Exception {
-        
-        if (novoIngrediente.getNome() == null || novoIngrediente.getNome().trim().length() < 2) {
-            throw new IllegalArgumentException("O nome do ingrediente é muito curto.");
+    public IngredienteModel buscarPorNome(String nome) throws Exception {
+        if (nome == null || nome.trim().isEmpty()) {
+            throw new IllegalArgumentException("Nome do ingrediente não pode ser vazio.");
         }
-        
         try {
-            IngredienteModel existente = ingredienteDAO.buscarPorNome(novoIngrediente.getNome());
-            
-            if (existente != null) {
-                System.out.println("Ingrediente '" + novoIngrediente.getNome() + "' já cadastrado. Não é necessária nova inserção.");
-                novoIngrediente.setId_ingrediente(existente.getId_ingrediente());
-                return true; 
-            }
-            return ingredienteDAO.salvarNovoIngrediente(novoIngrediente);
-
+            return ingredienteDAO.buscarPorNome(nome);
         } catch (SQLException e) {
-            System.err.println("Erro no Service ao processar ingrediente: " + e.getMessage());
-            throw new Exception("Falha ao salvar o ingrediente no sistema.", e); 
+            throw new Exception("Erro ao buscar ingrediente no BD.", e);
         }
     }
-    
-    /**
-     * @return 
-     * @throws SQLException
-     */
-    public List<IngredienteModel> buscarTodos() throws SQLException {
-        return ingredienteDAO.buscarTodosIngredientes();
+
+    public List<IngredienteModel> buscarTodos() throws Exception {
+        try {
+            return ingredienteDAO.buscarTodos();
+        } catch (SQLException e) {
+            throw new Exception("Erro ao buscar todos os ingredientes no BD.", e);
+        }
+    }
+
+    public boolean salvarNovo(IngredienteModel novoIngrediente) throws Exception {
+        if (novoIngrediente.getNome() == null || novoIngrediente.getUnidade_medida() == null) {
+            throw new IllegalArgumentException("Dados do ingrediente incompletos.");
+        }
+        
+        Connection conn = null;
+        try {
+            conn = ConnectionFactory.getConnection();
+            conn.setAutoCommit(true);
+            return ingredienteDAO.salvarNovoIngrediente(novoIngrediente, conn);
+        } catch (SQLException e) {
+            System.err.println("Erro SQL ao salvar novo ingrediente: " + e.getMessage());
+            throw new Exception("Falha ao salvar o ingrediente no banco de dados.", e);
+        } finally {
+            if (conn != null) conn.close();
+        }
     }
 }

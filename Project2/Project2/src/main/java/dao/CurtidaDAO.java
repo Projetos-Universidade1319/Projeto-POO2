@@ -13,15 +13,12 @@ public class CurtidaDAO {
      * @return 
      * @throws SQLException 
      */
-    public boolean salvarCurtida(int idReceita, int idUsuario) throws SQLException {
+    public boolean salvarCurtida(int idReceita, int idUsuario, Connection conn) throws SQLException { 
         String sql = "INSERT INTO curtida (id_receita, id_usuario) VALUES (?, ?)";
         
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) { 
             stmt.setInt(1, idReceita);
             stmt.setInt(2, idUsuario);
-
             return stmt.executeUpdate() > 0;
 
         } catch (SQLException e) {

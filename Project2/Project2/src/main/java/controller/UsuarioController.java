@@ -3,7 +3,6 @@ package controller;
 import model.UsuarioModel;
 import model.NivelConta; 
 import service.UsuarioService;
-import java.util.InputMismatchException;
 
 public class UsuarioController {
     
@@ -17,7 +16,7 @@ public class UsuarioController {
      * @param nome 
      * @param email 
      * @param senha 
-     * @return 
+     * @return
      */
     public String registrarNovoUsuario(String nome, String email, String senha) {
         
@@ -26,7 +25,6 @@ public class UsuarioController {
         }
         
         try {
-
             UsuarioModel novoUsuario = new UsuarioModel();
             novoUsuario.setNome(nome);
             novoUsuario.setEmail(email);
@@ -76,8 +74,19 @@ public class UsuarioController {
     }
 
     /**
-     * @param idUsuario 
-     * @return
+     * @param usuario
+     */
+    public void verificarNivelUsuario(UsuarioModel usuario) {
+        try {
+            usuarioService.verificarEAtualizarNivel(usuario);
+        } catch (Exception e) {
+            System.err.println("Erro ao verificar nível do usuário: " + e.getMessage());
+        }
+    }
+
+    /**
+     * @param idUsuario
+     * @return 
      */
     public String deletarConta(int idUsuario) {
         

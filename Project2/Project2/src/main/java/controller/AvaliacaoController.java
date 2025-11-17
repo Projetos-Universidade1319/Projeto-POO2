@@ -48,4 +48,17 @@ public class AvaliacaoController {
             return "ERRO INTERNO: Falha ao processar a requisição. Detalhe: " + e.getMessage();
         }
     }
+
+    /**
+     * @param avaliacao
+     * @return 
+     */
+    public boolean processarAvaliacao(AvaliacaoModel avaliacao) {
+        try {
+            return avaliacaoService.processarAvaliacao(avaliacao);
+        } catch (Exception e) {
+            System.err.println("Erro ao processar avaliação: " + e.getMessage());
+            return false;
+        }
+    }
 }
